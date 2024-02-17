@@ -13,13 +13,15 @@ def parse_log_line(line):
         return None
 
 def extract_query_data(data):
-    if data["msg"] == "Slow query" and "attr" in data and "queryHash" in data["attr"] and "planSummary" in data["attr"]:
+    msg = data.get("msg")
+    attr = data.get("attr", {})
+    if data["msg"] == "Slow query" and "queryHash" in attr:
         return {
-            "hash": data["attr"]["queryHash"],
-            "durationMillis": data["attr"]["durationMillis"],
-            "ns": data["attr"]["ns"],
-            "planSummary": data["attr"]["planSummary"],
-            "command": data["attr"]["command"] if "command" in data["attr"] else None
+            "hash": attr["queryHash"],
+            "durationMillis": attr.get("durationMillis"),
+            "ns": attr.get("ns"),
+            "planSummary": attr.get("planSummary"),
+            "command": attr.get("command")
         }
     return None
 
