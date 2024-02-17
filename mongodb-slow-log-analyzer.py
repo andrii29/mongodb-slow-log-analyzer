@@ -13,7 +13,7 @@ def parse_log_line(line):
         return None
 
 def extract_query_data(data):
-    if data["msg"] == "Slow query" and "attr" in data and "queryHash" in data["attr"] and data["attr"]["queryHash"]:
+    if data["msg"] == "Slow query" and "attr" in data and "queryHash" in data["attr"] and "planSummary" in data["attr"]:
         return {
             "hash": data["attr"]["queryHash"],
             "durationMillis": data["attr"]["durationMillis"],
@@ -40,12 +40,18 @@ def process_slow_log(data, db, limit, char_limit, count, sort, query_condition):
     for line in data:
         parsed_data = parse_log_line(line)
         if parsed_data:
-            query_data = extract_query_data(parsed_data)
+            try:
+                query_data = extract_query_data(parsed_data)
+            except Exception as e:
+                print(f'failed to extract query data: {e}')
             if query_data:
                 hash_key = query_data["hash"]
                 if hash_key not in hashes:
                     hashes.add(hash_key)
-                create_or_update_result(result, query_data)
+                try:
+                    create_or_update_result(result, query_data)
+                except Exception as e:
+                    print(f'failed to create or update result: {e}')
 
     if os.path.exists(db):
         os.remove(db)
@@ -64,7 +70,6 @@ def process_slow_log(data, db, limit, char_limit, count, sort, query_condition):
             command STRING
         )
     ''')
-
     for hash_key in hashes:
         cursor.execute('''
             INSERT OR REPLACE INTO results (hash, durationMillis, count, avgDurationMillis, ns, planSummary, command)
