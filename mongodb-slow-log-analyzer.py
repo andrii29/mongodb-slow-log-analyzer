@@ -110,7 +110,7 @@ def main():
     parser = argparse.ArgumentParser(description="Process MongoDB slow log file",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument("log", nargs="?", default="/var/log/mongod.log", help="Path to the mongodb log file")
+    parser.add_argument("log", nargs="?", default="/var/log/mongodb/mongod.log", help="Path to the mongodb log file")
     parser.add_argument("--db", default="./mongo_slow_logs.sql", help="Path to the SQLite database file")
     parser.add_argument("--limit", default=10, type=int, help="Limit the number of rows in SQL output")
     parser.add_argument("--char-limit", default=100, type=int, help="Limit the number of characters in SQL strings output")
